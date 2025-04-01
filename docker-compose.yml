@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  frontend-service:
+    build: ./frontend-service
+    ports:
+      - "80:80"
+    depends_on:
+      - api-gateway
+    networks:
+      - app-network
+
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "5000:5000"
+    depends_on:
+      - user-service
+      - auth-service
+    environment:
+      - USER_SERVICE_URL=http://user-service:5001
+      - AUTH_SERVICE_URL=http://auth-service:5002
+    networks:
+      - app-network
+
+  user-service:
+    build: ./user-service
+    ports:
+      - "5001:5001"
+    depends_on:
+      - database-service
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:password@database-service:3306/users_db
+    networks:
+      - app-network
+
+  auth-service:
+    build: ./auth-service
+    ports:
+      - "5002:5002"
+    depends_on:
+      - database-service
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:password@database-service:3306/auth_db
+      - SECRET_KEY=your-secret-key-should-be-very-long-and-secure
+    networks:
+      - app-network
+
+  database-service:
+    build: ./database-service
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
