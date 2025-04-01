@@ -1,0 +1,6 @@
+NAME                                       IMAGE                                    COMMAND                  SERVICE            CREATED          STATUS                      PORTS
+ship-happens-template-api-gateway-1        ship-happens-template-api-gateway        "python app.py"          api-gateway        34 seconds ago   Exited (1) 32 seconds ago   
+ship-happens-template-auth-service-1       ship-happens-template-auth-service       "python app.py"          auth-service       34 seconds ago   Exited (1) 33 seconds ago   
+ship-happens-template-database-service-1   ship-happens-template-database-service   "docker-entrypoint.s…"   database-service   34 seconds ago   Up 33 seconds               0.0.0.0:3306->3306/tcp, 33060/tcp
+ship-happens-template-frontend-service-1   ship-happens-template-frontend-service   "/docker-entrypoint.…"   frontend-service   34 seconds ago   Exited (1) 26 seconds ago   
+ship-happens-template-user-service-1       ship-happens-template-user-service       "python app.py"          user-service       34 seconds ago   Exited (1) 33 seconds ago   

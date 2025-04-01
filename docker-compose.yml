@@ -17,6 +17,11 @@ services:
     depends_on:
       - user-service
       - auth-service
+    # Wait for the database to be ready before starting the service
+    command: ["./wait-for-db.sh", "database-service", "python", "app.py"]
+    volumes:
+      - ./wait-for-db.sh:/app/wait-for-db.sh
+      
     environment:
       - USER_SERVICE_URL=http://user-service:5001
       - AUTH_SERVICE_URL=http://auth-service:5002
@@ -29,6 +34,11 @@ services:
       - "5001:5001"
     depends_on:
       - database-service
+    # Wait for the database to be ready before starting the service
+    command: ["./wait-for-db.sh", "database-service", "python", "app.py"]
+    volumes:
+      - ./wait-for-db.sh:/app/wait-for-db.sh
+
     environment:
       - DATABASE_URL=mysql+pymysql://root:password@database-service:3306/users_db
     networks:
@@ -40,6 +50,11 @@ services:
       - "5002:5002"
     depends_on:
       - database-service
+    # Wait for the database to be ready before starting the service
+    command: ["./wait-for-db.sh", "database-service", "python", "app.py"]
+    volumes:
+      - ./wait-for-db.sh:/app/wait-for-db.sh
+
     environment:
       - DATABASE_URL=mysql+pymysql://root:password@database-service:3306/auth_db
       - SECRET_KEY=your-secret-key-should-be-very-long-and-secure
