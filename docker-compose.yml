@@ -38,7 +38,7 @@ services:
       - ./wait-for-db.sh:/app/wait-for-db.sh
       
     environment:
-      - USER_SERVICE_URL=http://user-service:5001
+      - USER_SERVICE_URL=http://localhost:5000/api
       - AUTH_SERVICE_URL=http://auth-service:5002
       - TUTORIAL_SERVICE_URL=http://tutorial-service:5003
       - CONTAINER_SERVICE_URL=http://container-service:5004
@@ -87,6 +87,7 @@ services:
     networks:
       - app-network
 
+<<<<<<< HEAD
 
 
 
@@ -108,11 +109,30 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - SECRET_KEY=do-do-with-love-or-dont-do-at-all
+=======
+  tutorial-service:
+    build: ./tutorial-service
+    ports:
+      - "5003:5003"
+    depends_on:
+      - database-service
+    command: ["./wait-for-db.sh", "database-service", "python", "app.py"]
+    volumes:
+      - ./wait-for-db.sh:/app/wait-for-db.sh
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:password@database-service:3306/tutorials_db
+      - SECRET_KEY=your-secret-key-should-be-very-long-and-secure
+>>>>>>> feature/tutorial-service
     networks:
       - app-network
 
 
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> feature/tutorial-service
 networks:
   app-network:
     driver: bridge
