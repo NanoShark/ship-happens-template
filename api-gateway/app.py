@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import os
 from dotenv import load_dotenv
+import requests
 
 # Load environment variables
 load_dotenv()
@@ -11,6 +12,8 @@ app = Flask(__name__)
 # Database configuration
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'mysql+pymysql://root:password@database-service:3306/users_db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['TUTORIAL_SERVICE_URL'] = os.getenv('TUTORIAL_SERVICE_URL', 'http://tutorial-service:5003')
+app.config['CONTAINER_SERVICE_URL'] = os.getenv('CONTAINER_SERVICE_URL', 'http://container-service:5004')
 
 db = SQLAlchemy(app)
 
@@ -83,13 +86,40 @@ def delete_user(user_id):
     db.session.commit()
     return jsonify({"message": "User deleted"}), 200
 
+
+@app.route('/tutorials/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE'])
+def tutorial_proxy(path):
+    resp = requests.request(
+        method=request.method,
+        url=f"{app.config['TUTORIAL_SERVICE_URL']}/{path}",
+        headers={key: value for (key, value) in request.headers if key != 'Host'},
+        data=request.get_data(),
+        cookies=request.cookies,
+        allow_redirects=False,
+    )
+    excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
+    headers = [(name, value) for (name, value) in resp.raw.headers.items()
+               if name.lower() not in excluded_headers]
+    response = Response(resp.content, resp.status_code, headers)
+    return response
+
+@app.route('/containers/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE'])
+def container_proxy(path):
+    resp = requests.request(
+        method=request.method,
+        url=f"{app.config['CONTAINER_SERVICE_URL']}/{path}",
+        headers={key: value for (key, value) in request.headers if key != 'Host'},
+        data=request.get_data(),
+        cookies=request.cookies,
+        allow_redirects=False,
+    )
+    excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
+    headers = [(name, value) for (name, value) in resp.raw.headers.items()
+               if name.lower() not in excluded_headers]
+    response = Response(resp.content, resp.status_code, headers)
+    return response
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)
 
 
-# from flask import Flask
-
-# app = Flask(__name__)
-# @app.route('/')
-# def hello():
-#     return "Hello, World!"
