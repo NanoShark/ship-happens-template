@@ -1,218 +1,65 @@
-import axios from 'axios';
-import { useState, useEffect, useCallback } from 'react';
+// Add these functions to your existing services/api.js
 
-const API_URL = '/api';  // Proxied through Nginx to API Gateway
-
-// Configure axios with interceptors
-const configureAxios = () => {
-  // Add token to requests if available
-  axios.interceptors.request.use(
-    config => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-      return config;
-    },
-    error => {
-      return Promise.reject(error);
-    }
-  );
-};
-
-// Call configuration on module load
-configureAxios();
-
-// Auth endpoints
-export const login = async (credentials) => {
+// Tutorial endpoints
+export const getTutorialSteps = async () => {
   try {
-    const response = await axios.post(`${API_URL}/auth/login`, credentials);
-    localStorage.setItem('token', response.data.token);
+    const response = await axios.get(`${API_URL}/tutorials/steps`);
     return response.data;
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('Error fetching tutorial steps:', error);
     throw error;
   }
 };
 
-export const register = async (userData) => {
+export const getTutorialStep = async (stepId) => {
   try {
-    const response = await axios.post(`${API_URL}/auth/register`, userData);
+    const response = await axios.get(`${API_URL}/tutorials/steps/${stepId}`);
     return response.data;
   } catch (error) {
-    console.error('Registration error:', error);
+    console.error('Error fetching tutorial step:', error);
     throw error;
   }
 };
 
-export const logout = () => {
-  localStorage.removeItem('token');
-};
-
-// User endpoints as React hooks
-export const useUsers = () => {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  const fetchUsers = useCallback(async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get(`${API_URL}/users`);
-      setUsers(response.data);
-      setError(null);
-    } catch (err) {
-      setError('Failed to fetch users');
-      console.error('Error fetching users:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
-
-  return { users, loading, error, refreshUsers: fetchUsers };
-};
-
-export const useUser = (userId) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  const fetchUser = useCallback(async () => {
-    if (!userId) return;
-    
-    try {
-      setLoading(true);
-      const response = await axios.get(`${API_URL}/users/${userId}`);
-      setUser(response.data);
-      setError(null);
-    } catch (err) {
-      setError('Failed to fetch user');
-      console.error('Error fetching user:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, [userId]);
-
-  useEffect(() => {
-    fetchUser();
-  }, [fetchUser]);
-
-  return { user, loading, error, refreshUser: fetchUser };
-};
-
-export const useCreateUser = () => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [createdUser, setCreatedUser] = useState(null);
-
-  const createUser = async (userData) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await axios.post(`${API_URL}/users`, userData);
-      setCreatedUser(response.data);
-      return response.data;
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to create user');
-      console.error('Error creating user:', err);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return { createUser, loading, error, createdUser };
-};
-
-export const useUpdateUser = () => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [updatedUser, setUpdatedUser] = useState(null);
-
-  const updateUser = async (userId, userData) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await axios.put(`${API_URL}/users/${userId}`, userData);
-      setUpdatedUser(response.data);
-      return response.data;
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to update user');
-      console.error('Error updating user:', err);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return { updateUser, loading, error, updatedUser };
-};
-
-export const useDeleteUser = () => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [deleted, setDeleted] = useState(false);
-
-  const deleteUser = async (userId) => {
-    try {
-      setLoading(true);
-      setError(null);
-      await axios.delete(`${API_URL}/users/${userId}`);
-      setDeleted(true);
-      return true;
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to delete user');
-      console.error('Error deleting user:', err);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return { deleteUser, loading, error, deleted };
-};
-
-// Also export the original function versions for flexibility
-export const getUsersAsync = async () => {
+export const completeStep = async (stepId) => {
   try {
-    const response = await axios.get(`${API_URL}/users`);
+    const response = await axios.post(`${API_URL}/tutorials/steps/${stepId}/complete`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching users:', error);
+    console.error('Error completing step:', error);
     throw error;
   }
 };
 
-export const createUserAsync = async (userData) => {
+// Container service endpoints
+export const createContainer = async (stepId) => {
   try {
-    const response = await axios.post(`${API_URL}/users`, userData);
+    const response = await axios.post(`${API_URL}/containers/create`, { step_id: stepId });
     return response.data;
   } catch (error) {
-    console.error('Error creating user:', error);
+    console.error('Error creating container:', error);
     throw error;
   }
 };
 
-export const updateUserAsync = async (userId, userData) => {
+export const validateSolution = async (sessionId, validationScript) => {
   try {
-    const response = await axios.put(`${API_URL}/users/${userId}`, userData);
+    const response = await axios.post(`${API_URL}/containers/validate/${sessionId}`, {
+      validation_script: validationScript
+    });
     return response.data;
   } catch (error) {
-    console.error('Error updating user:', error);
+    console.error('Error validating solution:', error);
     throw error;
   }
 };
 
-export const deleteUserAsync = async (userId) => {
+export const terminateContainer = async (sessionId) => {
   try {
-    const response = await axios.delete(`${API_URL}/users/${userId}`);
+    const response = await axios.post(`${API_URL}/containers/terminate/${sessionId}`);
     return response.data;
   } catch (error) {
-    console.error('Error deleting user:', error);
+    console.error('Error terminating container:', error);
     throw error;
   }
 };
