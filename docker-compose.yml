@@ -1,14 +1,29 @@
 version: '3.8'
 
 services:
+  # frontend-service:
+  #   build: ./frontend-service
+  #   ports:
+  #     - "80:80"
+  #   depends_on:
+  #     - api-gateway
+  #   networks:
+  #     - app-network
+  
   frontend-service:
     build: ./frontend-service
     ports:
-      - "80:80"
+      - "3000:3000"  # React development server port
     depends_on:
       - api-gateway
+    volumes:
+      - ./frontend-service:/app  # For hot reloading during development
+      - /app/node_modules  # Don't override the node_modules directory
     networks:
       - app-network
+    environment:
+      - REACT_APP_API_URL=http://localhost:5000/api  # For development
+      - CHOKIDAR_USEPOLLING=true  # This helps with hot reloading in some environments
 
   api-gateway:
     build: ./api-gateway
