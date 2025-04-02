@@ -38,7 +38,7 @@ services:
       - ./wait-for-db.sh:/app/wait-for-db.sh
       
     environment:
-      - USER_SERVICE_URL=http://user-service:5001
+      - USER_SERVICE_URL=http://localhost:5000/api
       - AUTH_SERVICE_URL=http://auth-service:5002
     networks:
       - app-network
@@ -84,6 +84,25 @@ services:
       - mysql-data:/var/lib/mysql
     networks:
       - app-network
+
+  tutorial-service:
+    build: ./tutorial-service
+    ports:
+      - "5003:5003"
+    depends_on:
+      - database-service
+    command: ["./wait-for-db.sh", "database-service", "python", "app.py"]
+    volumes:
+      - ./wait-for-db.sh:/app/wait-for-db.sh
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:password@database-service:3306/tutorials_db
+      - SECRET_KEY=your-secret-key-should-be-very-long-and-secure
+    networks:
+      - app-network
+
+
+
+
 
 networks:
   app-network:
