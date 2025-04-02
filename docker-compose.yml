@@ -1,19 +1,10 @@
 version: '3.8'
 
 services:
-  # frontend-service:
-  #   build: ./frontend-service
-  #   ports:
-  #     - "80:80"
-  #   depends_on:
-  #     - api-gateway
-  #   networks:
-  #     - app-network
-  
   frontend-service:
     build: ./frontend-service
     ports:
-      - "3000:3000"  # React development server port
+      - "3000:3000"
     depends_on:
       - api-gateway
     volumes:
@@ -38,7 +29,7 @@ services:
       - ./wait-for-db.sh:/app/wait-for-db.sh
       
     environment:
-      - USER_SERVICE_URL=http://localhost:5000/api
+      - USER_SERVICE_URL=http://user-service:5001
       - AUTH_SERVICE_URL=http://auth-service:5002
       - TUTORIAL_SERVICE_URL=http://tutorial-service:5003
       - CONTAINER_SERVICE_URL=http://container-service:5004

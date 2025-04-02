@@ -1,36 +1,16 @@
-# # Build stage
-# FROM node:16-alpine as build
-
-# WORKDIR /app
-
-# COPY package*.json ./
-# RUN npm install
-
-# COPY . .
-# RUN npm run build
-
-# # Production stage
-# FROM nginx:alpine
-# COPY --from=build /app/build /usr/share/nginx/html
-# COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# EXPOSE 80
-
-# CMD ["nginx", "-g", "daemon off;"]
-
-FROM node:16-alpine
+FROM node:14-alpine
 
 WORKDIR /app
 
-# Install dependencies
-COPY package.json package-lock.json* ./
-RUN npm install
+# Copy package.json and install dependencies
+COPY package.json ./
 
-# Copy application code
+# Install dependencies with more detailed error output
+RUN npm install 
+
+# Copy the rest of the application
 COPY . .
 
-# Expose the port the app runs on
+# Expose port 3000 and start the app
 EXPOSE 3000
-
-# Command to run the app
 CMD ["npm", "start"]
