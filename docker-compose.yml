@@ -40,6 +40,8 @@ services:
     environment:
       - USER_SERVICE_URL=http://user-service:5001
       - AUTH_SERVICE_URL=http://auth-service:5002
+      - TUTORIAL_SERVICE_URL=http://tutorial-service:5003
+      - CONTAINER_SERVICE_URL=http://container-service:5004
     networks:
       - app-network
 
@@ -72,7 +74,7 @@ services:
 
     environment:
       - DATABASE_URL=mysql+pymysql://root:password@database-service:3306/auth_db
-      - SECRET_KEY=your-secret-key-should-be-very-long-and-secure
+      - SECRET_KEY=do-do-with-love-or-dont-do-at-all
     networks:
       - app-network
 
@@ -84,6 +86,32 @@ services:
       - mysql-data:/var/lib/mysql
     networks:
       - app-network
+
+
+
+
+
+
+
+
+
+
+
+  container-service:
+    build: ./container-service
+    ports:
+      - "5004:5004"
+    depends_on:
+      - database-service
+    privileged: true  
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - SECRET_KEY=do-do-with-love-or-dont-do-at-all
+    networks:
+      - app-network
+
+
 
 networks:
   app-network:
